@@ -1,6 +1,6 @@
-# Nocturne AI – Stock Trading Bot
+# Nocturne Intelligence – Stock Trading Bot
 
-**Nocturne AI** is a long-term project that aims to create a cutting-edge, intelligent chatbot to assist users in making informed decisions about stock trading. This repository hosts the codebase and documentation for Nocturne AI’s stock trading companion, providing features ranging from real-time market insights to automated trade execution and portfolio management. 
+**Nocturne Intelligence** is a long-term project that aims to create a cutting-edge, intelligent chatbot to assist users in making informed decisions about stock trading. This repository hosts the codebase and documentation for Nocturne Intelligence’s stock trading companion, providing features ranging from real-time market insights to automated trade execution and portfolio management. 
 
 ---
 
@@ -20,7 +20,7 @@
 ---
 
 ## Introduction
-Nocturne AI is envisioned to become an **all-in-one personal trading assistant** for both novice and experienced traders. By leveraging AI-driven insights and robust data processing, Nocturne AI can help users:
+Nocturne Intelligence is envisioned to become an **all-in-one personal trading assistant** for both novice and experienced traders. By leveraging AI-driven insights and robust data processing, Nocturne Intelligence can help users:
 
 - Research and analyze financial markets
 - Explore real-time market data
@@ -66,7 +66,7 @@ The ultimate goal is to create a comprehensive, user-friendly system that not on
 ---
 
 ## Roadmap
-Nocturne AI is a long-term effort with multiple development phases:
+Nocturne Intelligence is a long-term effort with multiple development phases:
 
 1. **Data Collection & Analysis (Current Focus)**  
    - Ensure real-time and historical data reliability  
@@ -98,7 +98,7 @@ Each milestone is designed to build upon the previous one, ensuring a systematic
 
 ## Installation
 
-To install and run Nocturne AI locally, follow the steps below:
+To install and run Nocturne Intelligence locally, follow the steps below:
 
 1. **Clone the Repository**  
    ```bash
@@ -126,14 +126,14 @@ To install and run Nocturne AI locally, follow the steps below:
    ```bash
    python run_nocturne.py
    ```
-   This command will launch Nocturne AI in your terminal (or a web interface, depending on your setup).
+   This command will launch Nocturne Intelligence in your terminal (or a web interface, depending on your setup).
 
 ---
 
 ## Usage
 
 ### 1. Interactive Mode
-After running `python run_nocturne.py`, you can interact with the bot via a command-line interface. Type your questions or commands, and Nocturne AI will respond accordingly.
+After running `python run_nocturne.py`, you can interact with the bot via a command-line interface. Type your questions or commands, and Nocturne Intelligence will respond accordingly.
 
 Example commands:
 - `show market data for AAPL`
@@ -148,7 +148,7 @@ A web-based dashboard will be introduced in a future version. This will allow yo
 - Configure automated trading parameters through a secure portal
 
 ### 3. API Integration
-For advanced users and developers, Nocturne AI will offer an API for integrating with existing systems or workflows. This API will provide endpoints for:
+For advanced users and developers, Nocturne Intelligence will offer an API for integrating with existing systems or workflows. This API will provide endpoints for:
 - Account and portfolio information
 - Trading signals and alerts
 - Execution commands (pending broker integration)
@@ -157,12 +157,12 @@ For advanced users and developers, Nocturne AI will offer an API for integrating
 
 ## Disclaimer and Liability
 
-> **Important**: Nocturne AI is a **research and educational tool** meant to guide and assist users in understanding financial markets. It does **not** guarantee any profits or the prevention of losses. While we make every effort to provide accurate information and reliable functionality, **use the system at your own risk**. 
+> **Important**: Nocturne Intelligence is a **research and educational tool** meant to guide and assist users in understanding financial markets. It does **not** guarantee any profits or the prevention of losses. While we make every effort to provide accurate information and reliable functionality, **use the system at your own risk**. 
 
 - Stock trading and investing involve **significant risk** of loss.  
 - Past performance of any strategy does not guarantee future results.  
 - Always consult with a qualified financial advisor or conduct thorough personal research before making investment decisions.  
-- The maintainers and contributors of Nocturne AI **will not be held liable** for any financial losses or damages resulting from the use of this software.
+- The maintainers and contributors of Nocturne Intelligence **will not be held liable** for any financial losses or damages resulting from the use of this software.
 
 ---
 
@@ -180,7 +180,7 @@ For major changes, please open an issue first to discuss your proposed modificat
 
 ## License
 
-This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details. Under this license, you’re free to use, modify, and distribute Nocturne AI’s code. However, the maintainers are not responsible for any misuse or damage caused by this software.
+This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details. Under this license, you’re free to use, modify, and distribute Nocturne Intelligence’s code. However, the maintainers are not responsible for any misuse or damage caused by this software.
 
 ---
 
@@ -190,4 +190,4 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 
 ---
 
-*Thank you for your interest in Nocturne AI. We look forward to building a powerful, transparent, and innovative trading assistant that helps users confidently navigate the stock market.*
+*Thank you for your interest in Nocturne Intelligence. We look forward to building a powerful, transparent, and innovative trading assistant that helps users confidently navigate the stock market.*

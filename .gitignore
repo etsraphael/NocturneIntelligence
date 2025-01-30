@@ -171,4 +171,4 @@ cython_debug/
 .pypirc
 
 # Files created by the Python static analysis tool
-.data-files
+data-files

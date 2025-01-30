@@ -10,12 +10,10 @@
 3. [Roadmap](#roadmap)
 4. [Installation](#installation)
 5. [Usage](#usage)
-6. [Configuration](#configuration)
-7. [Disclaimer and Liability](#disclaimer-and-liability)
-8. [Contributing](#contributing)
-9. [Support](#support)
-10. [License](#license)
-11. [Contact](#contact)
+6. [Disclaimer and Liability](#disclaimer-and-liability)
+7. [Contributing](#contributing)
+8. [License](#license)
+9. [Contact](#contact)
 
 ---
 

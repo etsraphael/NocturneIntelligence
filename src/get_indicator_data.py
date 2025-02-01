@@ -1,102 +1,101 @@
-import glob
-import os
+# src/indicators/get_indicator_data.py
+
+from pathlib import Path
 
 import pandas as pd
 import questionary
 
 
-def process_file(file_path, length=13):
-    """
-    Reads a CSV file, calculates the Rate of Change (ROC) for the 'close' column,
-    and generates a 'Buy' signal when ROC is below -15%.
-
-    Parameters:
-        file_path (str): Path to the raw CSV file.
-        length (int): Lookback period for the ROC calculation (default 13).
-
-    Returns:
-        pd.DataFrame: DataFrame with added 'roc' and 'signal' columns.
-    """
-    # Load the CSV file
-    df = pd.read_csv(file_path)
-
-    # Standardize column names to lowercase for consistency
-    df.columns = [col.lower() for col in df.columns]
-
-    # Ensure the 'close' column is available
-    if "close" not in df.columns:
-        raise ValueError("The CSV file does not contain a 'close' column.")
-
-    # Compute the Rate of Change (ROC)
-    df["roc"] = 100 * (df["close"] - df["close"].shift(length)) / df["close"].shift(length)
-
-    # Generate signals: flag a "Buy" when ROC is below -15%
-    df["signal"] = df["roc"].apply(lambda x: "Buy" if x < -15 else "")
-
+def calculate_roc(df, length=13):
+    """Calculate Rate of Change (ROC) for given DataFrame"""
+    df["ROC"] = 100 * (df["Close"] - df["Close"].shift(length)) / df["Close"].shift(length)
     return df
 
 
-def main():
-    # Directories for raw data and strategy results
-    raw_dir = "data-files/raw"
-    strategy_dir = "data-files/strategy-result"
+def generate_signals(df):
+    """Generate buy signals based on ROC threshold"""
+    df["Signal"] = df["ROC"] < -15
+    return df
 
-    # Create the output folder if it doesn't exist
-    if not os.path.exists(strategy_dir):
-        os.makedirs(strategy_dir)
 
-    # Find all CSV files in the raw data folder
-    pattern = os.path.join(raw_dir, "*.csv")
-    files = glob.glob(pattern)
+def get_available_tickers(raw_data_dir):
+    """Get sorted list of available tickers from raw data files"""
+    data_files = list(raw_data_dir.glob("*_*_*_1d.csv"))
+    tickers = sorted({f.name.split("_")[0] for f in data_files})
+    return tickers
 
-    if not files:
-        print(f"No CSV files found in {raw_dir}.")
-        return
 
-    # Extract unique tickers from the filenames (assumes ticker is before the first underscore)
-    tickers = sorted({os.path.basename(f).split("_")[0] for f in files})
-
-    # Use questionary to let the user select a ticker
-    selected_ticker = questionary.select("Select a stock ticker:", choices=tickers).ask()
-    if not selected_ticker:
-        print("No ticker selected. Exiting.")
-        return
-
-    # Filter files corresponding to the selected ticker
-    ticker_pattern = os.path.join(raw_dir, f"{selected_ticker}_*.csv")
-    ticker_files = glob.glob(ticker_pattern)
-
-    if not ticker_files:
-        print(f"No files found for ticker {selected_ticker}.")
-        return
-
-    # If multiple files exist for the ticker, let the user choose one
-    if len(ticker_files) > 1:
-        file_choice = questionary.select(
-            "Multiple files found. Select a file:", choices=ticker_files
-        ).ask()
-        if not file_choice:
-            print("No file selected. Exiting.")
-            return
-        file_path = file_choice
-    else:
-        file_path = ticker_files[0]
-
-    print(f"Processing file: {file_path}")
-
+def process_stock_data(ticker, raw_data_dir, output_dir):
+    """Process a single stock's data file"""
     try:
-        df_result = process_file(file_path)
+        # Find matching data file
+        pattern = f"{ticker}_*_*_1d.csv"
+        input_files = list(raw_data_dir.glob(pattern))
+
+        if not input_files:
+            raise FileNotFoundError(f"No data file found for {ticker}")
+
+        if len(input_files) > 1:
+            print(f"Multiple files found for {ticker}, using first match")
+
+        input_file = input_files[0]
+        output_file = output_dir / f"{ticker}_strategy.csv"
+
+        # Read and process data
+        df = pd.read_csv(input_file, parse_dates=["Date"])
+        df = calculate_roc(df)
+        df = generate_signals(df)
+
+        # Save results
+        df.to_csv(output_file, index=False)
+        print(f"✅ Processed {ticker} ({len(df)} records)")
+        print(f"📁 Output: {output_file}\n")
+
+        return True
+
     except Exception as e:
-        print(f"Error processing file: {e}")
+        print(f"❌ Error processing {ticker}: {e!s}\n")
+        return False
+
+
+def main():
+    """Main function to execute the strategy"""
+    # Configure paths
+    raw_data_dir = Path("data-files/raw")
+    output_dir = Path("data-files/strategy-result")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Get available tickers
+    tickers = get_available_tickers(raw_data_dir)
+
+    if not tickers:
+        print("❌ No data files found in raw directory")
+        print(f"Please add CSV files to {raw_data_dir.resolve()}")
         return
 
-    # Construct an output filename based on the input file's name
-    base_name = os.path.basename(file_path)
-    output_file = os.path.join(strategy_dir, f"strategy_{base_name}")
+    # Select stocks using Questionary
+    selected = questionary.checkbox(
+        "Select stocks to analyze:",
+        choices=tickers,
+        instruction="(Space to select, ↑↓ to navigate, Enter to submit)",
+        validate=lambda x: True if x else "Please select at least one stock",
+    ).ask()
 
-    # Save the resulting DataFrame to a new CSV file
-    df_result.to_csv(output_file, index=False)
-    print(f"Strategy results saved to: {output_file}")
+    if not selected:
+        print("⛔ No stocks selected")
+        return
+
+    # Process selected stocks
+    print("\n🚀 Processing stocks...\n")
+    success_count = 0
+    for ticker in selected:
+        success = process_stock_data(ticker, raw_data_dir, output_dir)
+        if success:
+            success_count += 1
+
+    # Show summary
+    print(f"\n🎉 Successfully processed {success_count}/{len(selected)} stocks")
+    print(f"Output directory: {output_dir.resolve()}")
 
 
 if __name__ == "__main__":

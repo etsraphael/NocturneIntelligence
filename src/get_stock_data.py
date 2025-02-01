@@ -121,11 +121,11 @@ try:
     data = clean_data(data)
 
     if data is not None:
-        # Create directory if it doesn't exist
-        os.makedirs("data-files", exist_ok=True)
+        # Create main data directory and raw subdirectory
+        os.makedirs("data-files/raw", exist_ok=True)
 
         # Save to CSV
-        csv_filename = f"data-files/{ticker}_{start_date}_{end_date}_{interval}.csv"
+        csv_filename = f"data-files/raw/{ticker}_{start_date}_{end_date}_{interval}.csv"
         data.to_csv(csv_filename, index=False)
         print(f"\nSuccessfully cleaned and saved {len(data)} records to {csv_filename}")
 

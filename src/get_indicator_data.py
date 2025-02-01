@@ -1,21 +1,9 @@
 # src/indicators/get_indicator_data.py
-
 from pathlib import Path
 
 import pandas as pd
 import questionary
-
-
-def calculate_roc(df, length=13):
-    """Calculate Rate of Change (ROC) for given DataFrame"""
-    df["ROC"] = 100 * (df["Close"] - df["Close"].shift(length)) / df["Close"].shift(length)
-    return df
-
-
-def generate_signals(df):
-    """Generate buy signals based on ROC threshold"""
-    df["Signal"] = df["ROC"] < -15
-    return df
+from indicators import INDICATORS
 
 
 def get_available_tickers(raw_data_dir):
@@ -25,7 +13,7 @@ def get_available_tickers(raw_data_dir):
     return tickers
 
 
-def process_stock_data(ticker, raw_data_dir, output_dir):
+def process_stock_data(ticker, indicator, raw_data_dir, output_dir):
     """Process a single stock's data file"""
     try:
         # Find matching data file
@@ -35,22 +23,18 @@ def process_stock_data(ticker, raw_data_dir, output_dir):
         if not input_files:
             raise FileNotFoundError(f"No data file found for {ticker}")
 
-        if len(input_files) > 1:
-            print(f"Multiple files found for {ticker}, using first match")
-
         input_file = input_files[0]
-        output_file = output_dir / f"{input_file.stem}_strategy.csv"
+        output_file = output_dir / f"{input_file.stem}_{indicator['key']}_strategy.csv"
 
-        # Read and process data
+        # Read data and apply indicator
         df = pd.read_csv(input_file, parse_dates=["Date"])
-        df = calculate_roc(df)
-        df = generate_signals(df)
+        strategy = indicator["class"]()
+        df = strategy.calculate(df)
 
         # Save results
         df.to_csv(output_file, index=False)
-        print(f"✅ Processed {ticker} ({len(df)} records)")
+        print(f"✅ Processed {ticker} with {indicator['name']} ({len(df)} records)")
         print(f"📁 Output: {output_file}\n")
-
         return True
 
     except Exception as e:
@@ -73,28 +57,49 @@ def main():
         print(f"Please add CSV files to {raw_data_dir.resolve()}")
         return
 
-    # Select stocks using Questionary
-    selected = questionary.checkbox(
+    # Create indicator choices
+    indicator_choices = [
+        {"name": f"{v['name']} - {v['description']}", "value": k}
+        for k, v in INDICATORS.items()
+    ]
+
+    # Select indicator
+    selected_indicator_key = questionary.select(
+        "Select an indicator to use:",
+        choices=indicator_choices,
+        instruction="(↑↓ to navigate, Enter to select)",
+    ).ask()
+
+    if not selected_indicator_key:
+        print("⛔ No indicator selected")
+        return
+
+    selected_indicator = {"key": selected_indicator_key, **INDICATORS[selected_indicator_key]}
+
+    # Select stocks
+    selected_tickers = questionary.checkbox(
         "Select stocks to analyze:",
         choices=tickers,
         instruction="(Space to select, ↑↓ to navigate, Enter to submit)",
         validate=lambda x: True if x else "Please select at least one stock",
     ).ask()
 
-    if not selected:
+    if not selected_tickers:
         print("⛔ No stocks selected")
         return
 
     # Process selected stocks
     print("\n🚀 Processing stocks...\n")
     success_count = 0
-    for ticker in selected:
-        success = process_stock_data(ticker, raw_data_dir, output_dir)
+
+    for ticker in selected_tickers:
+        success = process_stock_data(ticker, selected_indicator, raw_data_dir, output_dir)
         if success:
             success_count += 1
 
     # Show summary
-    print(f"\n🎉 Successfully processed {success_count}/{len(selected)} stocks")
+    print(f"\n🎉 Successfully processed {success_count}/{len(selected_tickers)} stocks")
+    print(f"Indicator used: {selected_indicator['name']}")
     print(f"Output directory: {output_dir.resolve()}")
 
 

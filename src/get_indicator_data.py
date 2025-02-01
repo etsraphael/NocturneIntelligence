@@ -39,7 +39,7 @@ def process_stock_data(ticker, raw_data_dir, output_dir):
             print(f"Multiple files found for {ticker}, using first match")
 
         input_file = input_files[0]
-        output_file = output_dir / f"{ticker}_strategy.csv"
+        output_file = output_dir / f"{input_file.stem}_strategy.csv"
 
         # Read and process data
         df = pd.read_csv(input_file, parse_dates=["Date"])

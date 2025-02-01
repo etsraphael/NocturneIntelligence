@@ -24,7 +24,7 @@ def process_stock_data(ticker, indicator, raw_data_dir, output_dir):
             raise FileNotFoundError(f"No data file found for {ticker}")
 
         input_file = input_files[0]
-        output_file = output_dir / f"{input_file.stem}_{indicator['key']}_strategy.csv"
+        output_file = output_dir / f"{input_file.stem}_{indicator['key']}_indicator.csv"
 
         # Read data and apply indicator
         df = pd.read_csv(input_file, parse_dates=["Date"])
@@ -46,7 +46,7 @@ def main():
     """Main function to execute the strategy"""
     # Configure paths
     raw_data_dir = Path("data-files/raw")
-    output_dir = Path("data-files/strategy-result")
+    output_dir = Path("data-files/indicator-result")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Get available tickers

@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 
+import pandas as pd
 import yfinance as yf
 
 
@@ -41,6 +42,43 @@ def get_valid_interval(prompt, default_interval):
         print(f"Invalid interval. Valid options are: {', '.join(valid_intervals)}")
 
 
+def clean_data(df):
+    """Clean the stock data by removing incorrect headers, ensuring data types, and dropping NaNs."""
+    if df.empty:
+        print("No data found for the given parameters.")
+        return None
+
+    # Reset index to bring 'Date' as a column
+    df.reset_index(inplace=True)
+
+    # Define expected columns based on available data
+    expected_columns = ["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"]
+    actual_columns = df.columns.tolist()
+
+    # Adjust column names dynamically
+    if "Adj Close" not in actual_columns:
+        expected_columns.remove("Adj Close")  # Remove "Adj Close" if not present
+
+    df.columns = expected_columns  # Assign correct column names
+
+    # Convert to proper data types
+    df["Date"] = pd.to_datetime(df["Date"])
+    df["Open"] = pd.to_numeric(df["Open"], errors="coerce")
+    df["High"] = pd.to_numeric(df["High"], errors="coerce")
+    df["Low"] = pd.to_numeric(df["Low"], errors="coerce")
+    df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
+
+    if "Adj Close" in df.columns:
+        df["Adj Close"] = pd.to_numeric(df["Adj Close"], errors="coerce")
+
+    df["Volume"] = pd.to_numeric(df["Volume"], errors="coerce")
+
+    # Drop NaN values if any
+    df.dropna(inplace=True)
+
+    return df
+
+
 # Get user inputs with validation
 today = datetime.today().date()
 default_start = today - timedelta(days=5 * 365)  # Approximate 5 years
@@ -79,16 +117,17 @@ try:
         interval=interval,
     )
 
-    if data.empty:
-        print("No data found for the given parameters.")
-    else:
+    # Clean the data
+    data = clean_data(data)
+
+    if data is not None:
         # Create directory if it doesn't exist
         os.makedirs("data-files", exist_ok=True)
 
         # Save to CSV
         csv_filename = f"data-files/{ticker}_{start_date}_{end_date}_{interval}.csv"
-        data.to_csv(csv_filename)
-        print(f"\nSuccessfully saved {len(data)} records to {csv_filename}")
+        data.to_csv(csv_filename, index=False)
+        print(f"\nSuccessfully cleaned and saved {len(data)} records to {csv_filename}")
 
 except Exception as e:
     print(f"\nAn error occurred: {e!s}")

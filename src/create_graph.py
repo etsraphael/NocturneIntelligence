@@ -4,6 +4,7 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import questionary
 
 
 def parse_filename(file_path):
@@ -102,20 +103,22 @@ def main():
             stock, start_date, end_date, interval = info
             stock_files.setdefault(stock, []).append((file, start_date, end_date, interval))
 
+    # Optionally list all available stocks and details.
     list_available_stocks(stock_files)
 
-    # Prompt the user for stock symbol(s) (comma-separated).
-    stocks_input = (
-        input("\nEnter the stock symbol(s) you want to graph (comma separated): ")
-        .upper()
-        .strip()
-    )
-    selected_stocks = [s.strip() for s in stocks_input.split(",")]
+    # Create a sorted list of available stocks.
+    available_stocks = sorted(stock_files.keys())
+
+    # Use questionary to let the user select stocks with arrow keys.
+    selected_stocks = questionary.checkbox(
+        "Select the stock(s) you want to graph:", choices=available_stocks
+    ).ask()
+
+    if not selected_stocks:
+        print("No stocks selected. Exiting.")
+        return
 
     for stock in selected_stocks:
-        if stock not in stock_files:
-            print(f"No data available for stock symbol: {stock}")
-            continue
         # For simplicity, we take the first file for the stock.
         process_stock(stock, stock_files[stock][0])
 

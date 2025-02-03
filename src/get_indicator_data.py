@@ -14,16 +14,37 @@ def get_available_tickers(raw_data_dir):
 
 
 def process_stock_data(ticker, indicator, raw_data_dir, output_dir):
-    """Process a single stock's data file"""
+    """Process a single stock's data file with interactive file selection"""
     try:
-        # Find matching data file
+        # Find matching data files
         pattern = f"{ticker}_*_*_1d.csv"
         input_files = list(raw_data_dir.glob(pattern))
 
         if not input_files:
             raise FileNotFoundError(f"No data file found for {ticker}")
 
-        input_file = input_files[0]
+        # Handle multiple file matches
+        if len(input_files) > 1:
+            file_choices = []
+            for f in input_files:
+                parts = f.stem.split("_")
+                if len(parts) >= 3:
+                    date_range = f"{parts[1]} to {parts[2]}"
+                else:
+                    date_range = "Unknown date range"
+                file_choices.append(
+                    questionary.Choice(title=f"{f.name} ({date_range})", value=f)
+                )
+
+            input_file = questionary.select(
+                f"Multiple configurations found for {ticker}. Select file:",
+                choices=file_choices,
+                instruction="(↑↓ to navigate, Enter to select)",
+            ).ask()
+        else:
+            input_file = input_files[0]
+
+        # Generate output filename
         output_file = output_dir / f"{input_file.stem}_{indicator['key']}_indicator.csv"
 
         # Read data and apply indicator
@@ -53,17 +74,13 @@ def main():
     tickers = get_available_tickers(raw_data_dir)
 
     if not tickers:
-        print("❌ No data files found in raw directory")
-        print(f"Please add CSV files to {raw_data_dir.resolve()}")
+        print(f"❌ No data files found in {raw_data_dir.resolve()}")
         return
-
-    # Create indicator choices
-    indicator_choices = [{"name": f"{v['name']}", "value": k} for k, v in INDICATORS.items()]
 
     # Select indicator
     selected_indicator_key = questionary.select(
         "Select an indicator to use:",
-        choices=indicator_choices,
+        choices=[{"name": v["name"], "value": k} for k, v in INDICATORS.items()],
         instruction="(↑↓ to navigate, Enter to select)",
     ).ask()
 

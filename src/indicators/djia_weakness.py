@@ -1,3 +1,4 @@
+# src/indicators/djia_weakness.py
 class DJIAWeakness:
     """Implementation of DJIA's Weakness indicator"""
 

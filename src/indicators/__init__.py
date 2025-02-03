@@ -1,3 +1,4 @@
+# src/indicators/__init__.py
 from .djia_weakness import DJIAWeakness
 
 INDICATORS = {

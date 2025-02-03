@@ -58,10 +58,7 @@ def main():
         return
 
     # Create indicator choices
-    indicator_choices = [
-        {"name": f"{v['name']} - {v['description']}", "value": k}
-        for k, v in INDICATORS.items()
-    ]
+    indicator_choices = [{"name": f"{v['name']}", "value": k} for k, v in INDICATORS.items()]
 
     # Select indicator
     selected_indicator_key = questionary.select(

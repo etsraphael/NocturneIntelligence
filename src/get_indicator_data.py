@@ -44,16 +44,38 @@ def process_stock_data(ticker, indicator, raw_data_dir, output_dir):
         else:
             input_file = input_files[0]
 
-        # Generate output filename
-        output_file = output_dir / f"{input_file.stem}_{indicator['key']}_indicator.csv"
+        # Generate base filename without indicator key
+        input_stem = input_file.stem.rsplit("_", 1)[0]  # Remove existing indicator suffix
+        output_file = output_dir / f"{input_stem}_indicator.csv"
 
         # Read data and apply indicator
         df = pd.read_csv(input_file, parse_dates=["Date"])
         strategy = indicator["class"]()
         df = strategy.calculate(df)
 
-        # Save results
-        df.to_csv(output_file, index=False)
+        # Prefix columns with indicator key
+        df = df.rename(
+            columns={col: f"{indicator['key']}_{col}" for col in df.columns if col != "Date"}
+        )
+
+        # Check for existing file and merge data
+        if output_file.exists():
+            existing_df = pd.read_csv(output_file, parse_dates=["Date"])
+
+            # Check if date ranges match
+            if not existing_df["Date"].equals(df["Date"]):
+                # Handle timeframe mismatch - create new file with indicator suffix
+                output_file = output_dir / f"{input_stem}_{indicator['key']}_indicator.csv"
+                df.to_csv(output_file, index=False)
+            else:
+                # Merge new columns into existing data
+                merged_df = existing_df.copy()
+                for col in df.columns:
+                    if col != "Date":
+                        merged_df[col] = df[col]
+                merged_df.to_csv(output_file, index=False)
+        else:
+            df.to_csv(output_file, index=False)
         print(f"✅ Processed {ticker} with {indicator['name']} ({len(df)} records)")
         print(f"📁 Output: {output_file}\n")
         return True
